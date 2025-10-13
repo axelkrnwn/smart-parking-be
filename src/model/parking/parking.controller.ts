@@ -24,17 +24,17 @@ export class ParkingController {
     let parking = new Parking()
     parking.id = randomUUID()
     parking.start = new Date()
-    parking.parkingTypeId = createParkingDto.parkingTypeId
-    parking.userId = createParkingDto.userId
+    parking.parkingtypeid = createParkingDto.parkingtypeid
+    parking.userid = createParkingDto.userid
 
     try {
-      await this.parkingService.create(createParkingDto)
-      let user = await this.userService.findOne(parking.userId)
+      await this.parkingService.create(parking)
+      let user = await this.userService.findOne(parking.userid)
       
       await this.emailService.sendEmail(
         user.email, 
         "Parking success", 
-        `Your vehicle with plat number ${parking.userId} has been entered at ${parking.start.toISOString()}`
+        `Your vehicle with plat number ${parking.userid} has been entered at ${parking.start.toISOString()}`
       )
     } catch (error) {
       throw new HttpException({

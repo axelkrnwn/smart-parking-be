@@ -1,4 +1,8 @@
+import { ApiProperty } from "@nestjs/swagger"
+
 export class CreateParkingDto {
-    userId: string
-    parkingTypeId: string
+    @ApiProperty()
+    userid: string
+    @ApiProperty()
+    parkingtypeid: string
 }
