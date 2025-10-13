@@ -44,7 +44,6 @@ export class UserController {
       return this.userService.findAll();
     }
 
-    @ApiBearerAuth('access_token')
     @UseGuards(UserGuard)
     @Get('me')
     @ApiCookieAuth('access_token')
@@ -54,9 +53,9 @@ export class UserController {
     async me(@Req() request: Request){
       // return request.
         const res = await request['user']
-        return res
-        // const user = await this.userService.findOne(res.id)
-        // return user
+        // return res
+        const user = await this.userService.findOne(res.id)
+        return user
     }
     
     @Get(':id')
@@ -79,6 +78,20 @@ export class UserController {
     @ApiResponse({ status: 404, description: 'The user is not found.'})
     remove(@Param('id') id: string) {
       return this.userService.remove(id);
+    }
+    
+    @Post('logout')
+    logout( @Res() resp: Response) {
+      console.log('[puki]')
+      resp.cookie('access_token', '', {
+        httpOnly: true,  
+        sameSite: 'lax',
+        expires: new Date(0),
+        maxAge: 0,
+      });
+      return resp.status(200).send({
+        message: "Logout success"
+      })
     }
 
     
