@@ -7,12 +7,15 @@ export class ParkingType {
   id: string;
 
   @Column({ length: 50 })
-  first: string;
+  vehicletype: string;
+
+  @Column({ length: 50 })
+  first: number;
 
   @Column({ length: 50, nullable: true })
-  second: string;
+  second?: number;
 
   @Column({ length: 50, nullable: true })
-  third: string;
+  third?: number;
 
 }

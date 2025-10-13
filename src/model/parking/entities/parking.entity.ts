@@ -19,4 +19,6 @@ export class Parking {
   @Column({ type: 'timestamp', nullable: true })
   end: Date | null;
 
+  userId: string;
+  parkingTypeId: string;
 }

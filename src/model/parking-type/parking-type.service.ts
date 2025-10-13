@@ -1,30 +1,40 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateParkingTypeDto } from './dto/create-parking-type.dto';
 import { UpdateParkingTypeDto } from './dto/update-parking-type.dto';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { ParkingType } from './entities/parking-type.entity';
 
 @Injectable()
 export class ParkingTypeService {
   constructor(@Inject('SUPABASE_CLIENT') private readonly supabase: SupabaseClient,) {}
-
-  async create(createParkingTypeDto: CreateParkingTypeDto) {
-    await this.supabase.from('parkingTypes').insert(createParkingTypeDto)
-    return 'This action adds a new parkingType';
+  async findAll(): Promise<ParkingType[]> {
+    const { data, error } = await this.supabase.from('ParkingType').select('*');
+    if (error) throw error;
+    return data || [];
   }
 
-  findAll() {
-    return `This action returns all parkingType`;
+  async findOne(id: string): Promise<ParkingType> {
+    const { data, error } = await this.supabase.from('ParkingType').select('*').eq('id', id).single();
+    if (error) throw new NotFoundException(error.message);
+    return data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} parkingType`;
+  async create(type: Partial<ParkingType>) {
+    const { data, error } = await this.supabase.from('ParkingType').insert(type).select().single();
+    if (error) throw error;
+    return data;
   }
 
-  update(id: number, updateParkingTypeDto: UpdateParkingTypeDto) {
-    return `This action updates a #${id} parkingType`;
+  async update(id: string, updates: Partial<ParkingType>) {
+    const { data, error } = await this.supabase.from('ParkingType').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} parkingType`;
+  async remove(id: string) {
+    const { error } = await this.supabase.from('ParkingType').delete().eq('id', id);
+    if (error) throw error;
+    return { message: `ParkingType ${id} deleted successfully` };
   }
+
 }

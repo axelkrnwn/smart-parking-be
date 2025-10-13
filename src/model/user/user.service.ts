@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+      @Inject('SUPABASE_CLIENT') private readonly supabase: SupabaseClient,
+  ){}
+
+  async create(user: Partial<User>) {
+    const { data, error } = await this.supabase.from('User').insert(user).select().single();
+    if (error) throw error;
+    return data;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async update(id: string, updates: Partial<User>) {
+    const { data, error } = await this.supabase.from('User').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async remove(id: string) {
+    const { error } = await this.supabase.from('User').delete().eq('id', id);
+    if (error) throw error;
+    return { message: `User ${id} deleted successfully` };
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+
+  async findAll(): Promise<User[]> {
+    const { data, error } = await this.supabase.from('User').select('*');
+    if (error) throw error;
+    return data || [];
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findOne(id: string): Promise<User> {
+    const { data, error } = await this.supabase.from('User').select('*').eq('id', id).single();
+    if (error) throw new NotFoundException(error.message);
+    return data;
   }
 }

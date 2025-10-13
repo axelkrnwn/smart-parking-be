@@ -1,4 +1,6 @@
 import { NestFactory } from '@nestjs/core';
+import * as dotenv from 'dotenv';
+dotenv.config();
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
