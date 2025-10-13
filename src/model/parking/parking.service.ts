@@ -32,6 +32,13 @@ async findAll(): Promise<Parking[]> {
     if (error) throw error;
     return data || [];
   }
+  async findByUserId(userId: string): Promise<Parking[]> {
+    const { data, error } = await this.supabase
+      .from('Parking')
+      .select('*, User(*), ParkingType(*)').eq("userid", userId);
+    if (error) throw error;
+    return data || [];
+  }
 
   async findOne(id: string): Promise<Parking> {
     const { data, error } = await this.supabase

@@ -51,6 +51,11 @@ export class ParkingController {
   findAll() {
     return this.parkingService.findAll();
   }
+  
+  @Get('user/:id')
+  findByUser(@Param('id') id: string) {
+    return this.parkingService.findByUserId(id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

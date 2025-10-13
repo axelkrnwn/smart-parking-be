@@ -20,5 +20,8 @@ export class Parking {
   end: Date | null;
 
   userid: string;
+  User: User | null;
+
   parkingtypeid: string;
+  ParkingType: Parking | null;
 }

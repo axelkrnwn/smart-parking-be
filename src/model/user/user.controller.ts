@@ -82,7 +82,6 @@ export class UserController {
     
     @Post('logout')
     logout( @Res() resp: Response) {
-      console.log('[puki]')
       resp.cookie('access_token', '', {
         httpOnly: true,  
         sameSite: 'lax',
