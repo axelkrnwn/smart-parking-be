@@ -1,11 +1,14 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { User } from './entities/user.entity';
+import { Hasher } from 'src/util/hash';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
       @Inject('SUPABASE_CLIENT') private readonly supabase: SupabaseClient,
+      private jwtService:JwtService
   ){}
 
   async create(user: Partial<User>) {
@@ -37,5 +40,23 @@ export class UserService {
     const { data, error } = await this.supabase.from('User').select('*').eq('id', id).single();
     if (error) throw new NotFoundException(error.message);
     return data;
+  }
+
+  async login(user: Partial<User>) {
+    let {data, error} = await this.supabase.from("User").select("*").eq("email", user.email).single()
+    if (error) throw new NotFoundException(error.message);
+
+    if (!data){
+            throw new Error("User not found")
+        }
+        const verify = await Hasher.verify(user.password!, data.password)
+        if (!verify){
+            throw new Error("Password incorrect")
+        }
+        const payload = {id:data.id, username:data.username}
+        return {
+            access_token: await this.jwtService.signAsync(payload),
+        };
+
   }
 }
