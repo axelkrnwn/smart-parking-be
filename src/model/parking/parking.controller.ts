@@ -21,29 +21,55 @@ export class ParkingController {
   @Post()
   async create(@Body() createParkingDto: CreateParkingDto) {
 
-    let parking = new Parking()
-    parking.id = randomUUID()
-    parking.start = new Date()
-    parking.parkingtypeid = createParkingDto.parkingtypeid
-    parking.userid = createParkingDto.userid
-
-    try {
-      await this.parkingService.create(parking)
-      let user = await this.userService.findOne(parking.userid)
-      
-      await this.emailService.sendEmail(
-        user.email, 
-        "Parking success", 
-        `Your vehicle with plat number ${parking.userid} has been entered at ${parking.start.toISOString()}`
-      )
-    } catch (error) {
-      throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          error: error.message,
-      }, HttpStatus.BAD_REQUEST, {
-          cause: error
-      }); 
+    let user = await this.userService.findOne(createParkingDto.userid)
+    let parkings = await this.parkingService.findByUserId(createParkingDto.userid)
+    if (parkings.length < 1){
+      let parking = new Parking()
+      parking.id = randomUUID()
+      parking.start = new Date()
+      parking.parkingtypeid = createParkingDto.parkingtypeid
+      parking.userid = createParkingDto.userid
+      try {
+        await this.parkingService.create(parking)
+        
+        await this.emailService.sendEmail(
+          user.email, 
+          "Enter parking success", 
+          `Your vehicle with plat number ${parking.userid} has been entered at ${parking.start.toISOString()}`
+        )
+      } catch (error) {
+        throw new HttpException({
+            status: HttpStatus.BAD_REQUEST,
+            error: error.message,
+        }, HttpStatus.BAD_REQUEST, {
+            cause: error
+        }); 
+      }
+    }else {
+      let parking = new Parking()
+      parking.id = parkings[0].id
+      parking.start = new Date(parkings[0].start)
+      parking.parkingtypeid = createParkingDto.parkingtypeid
+      parking.userid = createParkingDto.userid
+      parking.end = new Date()
+      try {
+        await this.parkingService.update(parking.id, parking)
+        
+        await this.emailService.sendEmail(
+          user.email, 
+          "Leaving parking success", 
+          `Your vehicle with plat number ${parking.userid} has leave at ${parking.start.toISOString()}`
+        )
+      } catch (error) {
+        throw new HttpException({
+            status: HttpStatus.BAD_REQUEST,
+            error: error.message,
+        }, HttpStatus.BAD_REQUEST, {
+            cause: error
+        }); 
+      }
     }
+
     
   }
 
